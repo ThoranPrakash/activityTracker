@@ -65,15 +65,15 @@ body{
 .nav-btn {
   flex:1; display:flex; flex-direction:column;
   align-items:center; justify-content:center;
-  padding:10px 4px 8px;
-  gap:3px; border:none; background:none;
+  padding:8px 2px 6px;
+  gap:2px; border:none; background:none;
   cursor:pointer; color:var(--text3);
   font-family:'DM Sans',sans-serif;
-  font-size:10px; font-weight:500;
+  font-size:9px; font-weight:500;
   transition:color .2s;
 }
 .nav-btn.active { color:var(--lime); }
-.nav-btn svg { width:22px; height:22px; }
+.nav-btn svg { width:19px; height:19px; }
 .nav-dot {
   position:absolute; top:8px; right:calc(50% - 14px);
   width:6px; height:6px; border-radius:50%;
@@ -648,6 +648,300 @@ canvas { width:100%!important; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
 
+/* ── HABIT TRACKER ── */
+.habit-date-strip {
+  display:flex; gap:6px; padding:12px 12px 4px;
+  overflow-x:auto; scrollbar-width:none;
+}
+.habit-date-strip::-webkit-scrollbar{display:none;}
+.hds-day {
+  display:flex; flex-direction:column; align-items:center;
+  min-width:40px; padding:8px 6px;
+  border-radius:10px; cursor:pointer;
+  border:1px solid var(--border);
+  background:var(--card);
+  transition:all .2s; flex-shrink:0;
+}
+.hds-day.active {
+  background:var(--lime); border-color:var(--lime);
+}
+.hds-day.active .hds-dow,
+.hds-day.active .hds-num { color:#0a0a0a; }
+.hds-dow { font-size:9px; font-weight:600; color:var(--text3); letter-spacing:.5px; text-transform:uppercase; }
+.hds-num { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--text); line-height:1.1; }
+
+.habit-section { padding:10px 12px 0; }
+.habit-section-title {
+  font-size:10px; font-weight:700; letter-spacing:1.5px;
+  color:var(--text3); text-transform:uppercase;
+  padding:8px 0 6px; display:flex; align-items:center; gap:8px;
+}
+.habit-section-title span { flex:1; height:1px; background:var(--border); }
+
+.habit-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  margin-bottom:8px;
+  overflow:hidden;
+}
+.habit-row {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px;
+  cursor:pointer; user-select:none;
+  transition:background .15s;
+}
+.habit-row:active { background:var(--card2); }
+.habit-icon {
+  width:36px; height:36px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; flex-shrink:0;
+  background:var(--card2); border:1px solid var(--border2);
+}
+.habit-info { flex:1; min-width:0; }
+.habit-name { font-size:14px; font-weight:500; }
+.habit-streak {
+  font-size:11px; color:var(--text2); margin-top:2px;
+  display:flex; align-items:center; gap:4px;
+}
+.streak-fire { color:var(--coral); }
+.habit-check {
+  width:28px; height:28px; border-radius:8px;
+  border:2px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all .2s cubic-bezier(.34,1.56,.64,1);
+}
+.habit-row.habit-done .habit-check {
+  background:var(--lime); border-color:var(--lime);
+  transform:scale(1.08);
+}
+.habit-row.habit-done .habit-name { color:var(--text3); }
+.habit-row.habit-done .habit-check svg { opacity:1 !important; }
+.habit-check svg { opacity:0; transition:opacity .15s; }
+
+/* Weekly grid inside habit card */
+.habit-week-grid {
+  display:flex; gap:3px;
+  padding:0 14px 12px;
+}
+.hwg-cell {
+  flex:1; height:8px; border-radius:3px;
+  background:var(--border2);
+  transition:background .3s;
+}
+.hwg-cell.done { background:var(--lime); }
+.hwg-cell.today { outline:1.5px solid var(--lime); outline-offset:1px; }
+
+/* Add habit form */
+.add-habit-btn {
+  width:100%; padding:12px;
+  background:var(--card); border:1px dashed var(--border2);
+  border-radius:var(--r); color:var(--text2);
+  font-family:'DM Sans',sans-serif; font-size:13px;
+  cursor:pointer; display:flex; align-items:center;
+  justify-content:center; gap:8px; margin-bottom:8px;
+  transition:all .2s;
+}
+.add-habit-btn:hover { border-color:var(--lime); color:var(--lime); }
+
+.habit-form {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:14px; margin-bottom:8px;
+}
+.habit-form input, .habit-form select {
+  width:100%; background:var(--card2);
+  border:1px solid var(--border2); border-radius:var(--r-sm);
+  color:var(--text); font-family:'DM Sans',sans-serif;
+  font-size:14px; padding:10px 12px;
+  outline:none; margin-bottom:8px;
+  transition:border-color .2s;
+}
+.habit-form input:focus { border-color:var(--lime); }
+.habit-form-row { display:flex; gap:8px; }
+.habit-emoji-pick {
+  display:flex; flex-wrap:wrap; gap:6px;
+  margin-bottom:10px;
+}
+.emoji-opt {
+  width:36px; height:36px; border-radius:8px;
+  background:var(--card2); border:1.5px solid var(--border2);
+  font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.emoji-opt.selected { border-color:var(--lime); background:rgba(200,255,0,.1); }
+
+/* Habit stats */
+.habit-stats-row {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:8px; margin-bottom:10px;
+}
+.hstat {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:12px; text-align:center;
+}
+.hstat-val {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:26px; font-weight:700;
+}
+.hstat-lbl { font-size:10px; color:var(--text2); margin-top:2px; text-transform:uppercase; letter-spacing:.8px; }
+
+/* ── TO-DO LIST ── */
+.todo-tabs {
+  display:flex; border-bottom:1px solid var(--border);
+  padding:0 12px;
+}
+.todo-tab {
+  padding:12px 16px 10px; font-size:13px; font-weight:600;
+  color:var(--text2); cursor:pointer; border:none;
+  background:none; border-bottom:2px solid transparent;
+  margin-bottom:-1px; transition:all .2s;
+  display:flex; align-items:center; gap:6px;
+}
+.todo-tab.active { color:var(--lime); border-bottom-color:var(--lime); }
+.todo-badge {
+  min-width:18px; height:18px; border-radius:100px;
+  background:var(--card2); border:1px solid var(--border2);
+  font-size:10px; font-weight:700; color:var(--text2);
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:0 5px;
+}
+.todo-tab.active .todo-badge { background:rgba(200,255,0,.15); color:var(--lime); border-color:rgba(200,255,0,.3); }
+
+.todo-panel { display:none; padding:10px 12px; }
+.todo-panel.active { display:block; }
+
+/* Add task input */
+.todo-add-wrap {
+  display:flex; gap:8px; margin-bottom:12px;
+}
+.todo-add-wrap input {
+  flex:1; background:var(--card);
+  border:1px solid var(--border2); border-radius:var(--r-sm);
+  color:var(--text); font-family:'DM Sans',sans-serif;
+  font-size:14px; padding:10px 12px;
+  outline:none; transition:border-color .2s;
+}
+.todo-add-wrap input:focus { border-color:var(--lime); }
+.todo-add-btn {
+  width:42px; height:42px; border-radius:var(--r-sm);
+  background:var(--lime); border:none;
+  font-size:22px; font-weight:300;
+  color:#0a0a0a; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:transform .15s;
+}
+.todo-add-btn:active { transform:scale(.93); }
+
+/* Priority selector */
+.priority-row {
+  display:flex; gap:6px; margin-bottom:10px;
+}
+.pri-btn {
+  padding:4px 12px; border-radius:100px;
+  font-size:11px; font-weight:600;
+  border:1px solid var(--border2);
+  background:var(--card2); color:var(--text2);
+  cursor:pointer; transition:all .15s;
+}
+.pri-btn.sel-high   { background:rgba(255,94,58,.15);  border-color:var(--coral);  color:var(--coral); }
+.pri-btn.sel-medium { background:rgba(255,200,71,.15); border-color:var(--gold);   color:var(--gold); }
+.pri-btn.sel-low    { background:rgba(58,140,255,.15); border-color:var(--blue);   color:var(--blue); }
+
+/* Task item */
+.task-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:11px 14px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  margin-bottom:6px;
+  cursor:pointer; user-select:none;
+  transition:all .2s;
+  position:relative; overflow:hidden;
+}
+.task-item::before {
+  content:''; position:absolute;
+  left:0; top:0; bottom:0; width:3px;
+}
+.task-item.pri-high::before   { background:var(--coral); }
+.task-item.pri-medium::before { background:var(--gold); }
+.task-item.pri-low::before    { background:var(--blue); }
+.task-item.task-done { opacity:.5; }
+.task-item:active { opacity:.7; }
+
+.task-cb {
+  width:22px; height:22px; border-radius:6px;
+  border:2px solid var(--border2); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+  margin-top:1px;
+}
+.task-item.task-done .task-cb {
+  background:var(--success); border-color:var(--success);
+}
+.task-cb svg { opacity:0; }
+.task-item.task-done .task-cb svg { opacity:1; }
+
+.task-body { flex:1; min-width:0; }
+.task-text {
+  font-size:13.5px; font-weight:500; line-height:1.3;
+}
+.task-item.task-done .task-text {
+  text-decoration:line-through; color:var(--text3);
+}
+.task-meta {
+  display:flex; align-items:center; gap:8px;
+  margin-top:4px;
+}
+.task-time { font-size:11px; color:var(--text3); font-family:'DM Mono',monospace; }
+.task-pri-tag {
+  font-size:10px; font-weight:600; padding:2px 7px;
+  border-radius:100px; letter-spacing:.5px;
+}
+.task-pri-tag.high   { background:rgba(255,94,58,.15);  color:var(--coral); }
+.task-pri-tag.medium { background:rgba(255,200,71,.15); color:var(--gold); }
+.task-pri-tag.low    { background:rgba(58,140,255,.15); color:var(--blue); }
+
+.task-del {
+  background:none; border:none; color:var(--text3);
+  font-size:16px; cursor:pointer; padding:2px 4px;
+  border-radius:4px; flex-shrink:0; line-height:1;
+  transition:color .15s;
+}
+.task-del:hover { color:var(--coral); }
+
+/* Filters */
+.todo-filters {
+  display:flex; gap:6px; margin-bottom:10px;
+  overflow-x:auto; scrollbar-width:none;
+}
+.todo-filters::-webkit-scrollbar{display:none;}
+.filter-btn {
+  padding:5px 12px; border-radius:100px; font-size:11px;
+  font-weight:600; border:1px solid var(--border);
+  background:var(--card); color:var(--text2);
+  cursor:pointer; white-space:nowrap; transition:all .2s;
+  flex-shrink:0;
+}
+.filter-btn.active { background:var(--card2); border-color:var(--border2); color:var(--text); }
+
+/* Daily reset banner */
+.daily-reset-note {
+  text-align:center; padding:8px;
+  font-size:11px; color:var(--text3);
+  margin-bottom:8px;
+}
+
+/* Empty state */
+.todo-empty {
+  text-align:center; padding:32px 16px;
+  color:var(--text3); font-size:13px;
+}
+.todo-empty .big { font-size:36px; margin-bottom:8px; }
+
 /* Animations */
 @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 .screen.active > * { animation:fadeIn .2s ease both; }
@@ -724,6 +1018,24 @@ canvas { width:100%!important; }
     <div id="settingsContent"></div>
   </div>
 
+  <!-- ═══ HABITS SCREEN ═══ -->
+  <div class="screen" id="screen-habits">
+    <div class="page-header">
+      <h1 class="font-cond">HABIT <span>TRACKER</span></h1>
+      <p class="header-sub" id="habitHeaderSub">Build streaks, stay consistent</p>
+    </div>
+    <div id="habitsContent"></div>
+  </div>
+
+  <!-- ═══ TODO SCREEN ═══ -->
+  <div class="screen" id="screen-todo">
+    <div class="page-header">
+      <h1 class="font-cond">TO-DO <span>LIST</span></h1>
+      <p class="header-sub" id="todoHeaderSub">Daily tasks + persistent backlog</p>
+    </div>
+    <div id="todoContent"></div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <button class="nav-btn active" onclick="switchTab('today')" id="nav-today">
@@ -738,6 +1050,19 @@ canvas { width:100%!important; }
       </svg>
       Program
     </button>
+    <button class="nav-btn" onclick="switchTab('habits')" id="nav-habits">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M12 6v6l4 2"/>
+      </svg>
+      Habits
+    </button>
+    <button class="nav-btn" onclick="switchTab('todo')" id="nav-todo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      To-Do
+    </button>
     <button class="nav-btn" onclick="switchTab('progress')" id="nav-progress">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
@@ -748,7 +1073,7 @@ canvas { width:100%!important; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
       </svg>
-      Settings
+      More
     </button>
   </nav>
 </div>
@@ -1877,9 +2202,10 @@ function scheduleReminders() {
 
 function exportData() {
   const data = {
-    version: '1.0',
+    version: '2.0',
     exportedAt: new Date().toISOString(),
-    profile, checked, dailyLog, reminders
+    profile, checked, dailyLog, reminders,
+    habits, habitLogs, todoDaily, todoBacklog
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
   const url = URL.createObjectURL(blob);
@@ -1898,10 +2224,14 @@ function importData(e) {
   reader.onload = ev => {
     try {
       const data = JSON.parse(ev.target.result);
-      if (data.profile)   { profile   = data.profile;   saveData('ft_profile',   profile); }
-      if (data.checked)   { checked   = data.checked;   saveData('ft_checked',   checked); }
-      if (data.dailyLog)  { dailyLog  = data.dailyLog;  saveData('ft_dailyLog',  dailyLog); }
-      if (data.reminders) { reminders = data.reminders; saveData('ft_reminders', reminders); }
+      if (data.profile)      { profile      = data.profile;      saveData('ft_profile',      profile); }
+      if (data.checked)      { checked      = data.checked;      saveData('ft_checked',      checked); }
+      if (data.dailyLog)     { dailyLog     = data.dailyLog;     saveData('ft_dailyLog',     dailyLog); }
+      if (data.reminders)    { reminders    = data.reminders;    saveData('ft_reminders',    reminders); }
+      if (data.habits)       { habits       = data.habits;       saveData('ft_habits',       habits); }
+      if (data.habitLogs)    { habitLogs    = data.habitLogs;    saveData('ft_habitLogs',    habitLogs); }
+      if (data.todoDaily)    { todoDaily    = data.todoDaily;    saveData('ft_todoDaily',    todoDaily); }
+      if (data.todoBacklog)  { todoBacklog  = data.todoBacklog;  saveData('ft_todoBacklog',  todoBacklog); }
       showToast('✅ Data imported! Reloading…');
       setTimeout(() => location.reload(), 1200);
     } catch(err) {
@@ -1913,7 +2243,7 @@ function importData(e) {
 
 function resetData() {
   if (!confirm('Reset ALL progress? This cannot be undone.')) return;
-  ['ft_profile','ft_checked','ft_dailyLog','ft_reminders'].forEach(k => localStorage.removeItem(k));
+  ['ft_profile','ft_checked','ft_dailyLog','ft_reminders','ft_habits','ft_habitLogs','ft_todoDaily','ft_todoBacklog'].forEach(k => localStorage.removeItem(k));
   showToast('🗑️ All data cleared. Reloading…');
   setTimeout(() => location.reload(), 1000);
 }
@@ -1926,13 +2256,448 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(`screen-${tab}`).classList.add('active');
   document.getElementById(`nav-${tab}`).classList.add('active');
-
   if (tab === 'today')    renderToday();
   if (tab === 'week')     renderWeek();
+  if (tab === 'habits')   renderHabits();
+  if (tab === 'todo')     renderTodo();
   if (tab === 'progress') renderProgress();
   if (tab === 'settings') renderSettings();
-
   window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  HABIT TRACKER
+// ═══════════════════════════════════════════════════════════════════
+const DEFAULT_HABITS = [
+  { id:'h1', name:'Drink 3L Water',     icon:'💧', color:'#3a8cff', category:'health' },
+  { id:'h2', name:'Sleep 7-9 hours',    icon:'😴', color:'#9b7eff', category:'health' },
+  { id:'h3', name:'No junk food',       icon:'🥗', color:'#00d68f', category:'health' },
+  { id:'h4', name:'Morning stretch',    icon:'🧘', color:'#c8ff00', category:'fitness' },
+  { id:'h5', name:'Evening walk',       icon:'🚶', color:'#ffc847', category:'fitness' },
+  { id:'h6', name:'Read 20 minutes',    icon:'📖', color:'#ff5e3a', category:'mindset' },
+];
+
+let habits     = loadData('ft_habits',     DEFAULT_HABITS);
+let habitLogs  = loadData('ft_habitLogs',  {});  // { "YYYY-MM-DD": { habitId: true } }
+let habitView  = { selectedDate: dateKey() };
+let addingHabit = false;
+let newHabitEmoji = '⭐';
+
+const EMOJI_OPTIONS = ['💧','😴','🥗','🧘','🚶','📖','💪','🏃','🎯','✅','🧠','❤️','🌅','🍎','☕','📝','🎵','💊','🛁','📵'];
+
+function getHabitLog(dk) { return habitLogs[dk] || {}; }
+
+function toggleHabit(habitId, dk) {
+  if (!habitLogs[dk]) habitLogs[dk] = {};
+  habitLogs[dk][habitId] = !habitLogs[dk][habitId];
+  saveData('ft_habitLogs', habitLogs);
+}
+
+function getStreak(habitId) {
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const dk = dateKey(d);
+    if (habitLogs[dk]?.[habitId]) streak++;
+    else if (i > 0) break;
+  }
+  return streak;
+}
+
+function getWeekGrid(habitId) {
+  const grid = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    grid.push({ dk: dateKey(d), isToday: i === 0 });
+  }
+  return grid;
+}
+
+function getCompletedToday(dk) {
+  const log = getHabitLog(dk);
+  return habits.filter(h => log[h.id]).length;
+}
+
+function renderHabits() {
+  const dk = habitView.selectedDate;
+  const log = getHabitLog(dk);
+  const todayDk = dateKey();
+  const totalDone = getCompletedToday(dk);
+
+  document.getElementById('habitHeaderSub').textContent =
+    dk === todayDk ? `Today · ${totalDone}/${habits.length} completed` :
+    `${new Date(dk+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} · ${totalDone}/${habits.length} done`;
+
+  // Build date strip (last 7 days)
+  let dateStrip = '<div class="habit-date-strip">';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const dddk = dateKey(d);
+    const isActive = dddk === dk;
+    const dow = d.toLocaleDateString('en-GB',{weekday:'short'}).slice(0,1);
+    const num = d.getDate();
+    dateStrip += `<div class="hds-day ${isActive?'active':''}" onclick="selectHabitDate('${dddk}')">
+      <div class="hds-dow">${dow}</div>
+      <div class="hds-num">${num}</div>
+    </div>`;
+  }
+  dateStrip += '</div>';
+
+  // Stats row
+  const totalStreaks = habits.reduce((a,h) => a + getStreak(h.id), 0);
+  const best = habits.reduce((best,h) => { const s=getStreak(h.id); return s>best?s:best; }, 0);
+  const stats = `
+  <div class="habit-section">
+    <div class="habit-stats-row">
+      <div class="hstat">
+        <div class="hstat-val" style="color:var(--lime)">${totalDone}/${habits.length}</div>
+        <div class="hstat-lbl">Done Today</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val" style="color:var(--coral)">${best}</div>
+        <div class="hstat-lbl">Best Streak</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val" style="color:var(--gold)">${totalStreaks}</div>
+        <div class="hstat-lbl">Total Days</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Habits list grouped by category
+  const cats = { fitness:'💪 Fitness', health:'🌿 Health', mindset:'🧠 Mindset & Lifestyle', custom:'✨ My Habits' };
+  const grouped = {};
+  habits.forEach(h => {
+    const cat = h.category || 'custom';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(h);
+  });
+
+  let habitList = '';
+  Object.entries(grouped).forEach(([cat, list]) => {
+    habitList += `<div class="habit-section">
+      <div class="habit-section-title">${cats[cat]||cat} <span></span></div>`;
+    list.forEach(h => {
+      const done = !!log[h.id];
+      const streak = getStreak(h.id);
+      const weekGrid = getWeekGrid(h.id);
+      habitList += `
+      <div class="habit-card">
+        <div class="habit-row ${done?'habit-done':''}"
+          onclick="handleHabitToggle('${h.id}','${dk}',this)">
+          <div class="habit-icon" style="${done?`background:${h.color}22;border-color:${h.color}44`:''}">${h.icon}</div>
+          <div class="habit-info">
+            <div class="habit-name">${h.name}</div>
+            <div class="habit-streak">
+              ${streak > 0 ? `<span class="streak-fire">🔥</span> ${streak} day streak` : 'Start your streak today'}
+            </div>
+          </div>
+          <div class="habit-check" style="${done?`background:${h.color};border-color:${h.color}`:''}">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <polyline points="2,7 6,11 12,3" stroke="${done?'#0a0a0a':'var(--text)'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="habit-week-grid">
+          ${weekGrid.map(({dk:wdk, isToday}) => {
+            const wdone = !!habitLogs[wdk]?.[h.id];
+            return `<div class="hwg-cell ${wdone?'done':''} ${isToday?'today':''}"
+              title="${wdk}" style="${wdone?`background:${h.color}`:''}"></div>`;
+          }).join('')}
+        </div>
+      </div>`;
+      // Long-press to delete: show delete on the habit card itself
+    });
+    habitList += '</div>';
+  });
+
+  // Add habit button / form
+  let addSection = `<div class="habit-section">`;
+  if (addingHabit) {
+    addSection += `
+    <div class="habit-form">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text)">New Habit</div>
+      <input type="text" id="newHabitName" placeholder="Habit name e.g. Meditate 10 min" maxlength="40"/>
+      <div style="font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Pick an icon</div>
+      <div class="habit-emoji-pick">
+        ${EMOJI_OPTIONS.map(e => `<div class="emoji-opt ${e===newHabitEmoji?'selected':''}" onclick="selectEmoji('${e}')">${e}</div>`).join('')}
+      </div>
+      <select id="newHabitCat" style="margin-bottom:10px">
+        <option value="fitness">💪 Fitness</option>
+        <option value="health">🌿 Health</option>
+        <option value="mindset">🧠 Mindset & Lifestyle</option>
+        <option value="custom">✨ My Habits</option>
+      </select>
+      <div class="habit-form-row">
+        <button class="btn btn-primary" style="flex:1;padding:10px" onclick="saveNewHabit()">Add Habit</button>
+        <button class="btn btn-ghost" style="padding:10px 16px" onclick="cancelAddHabit()">Cancel</button>
+      </div>
+    </div>`;
+  } else {
+    addSection += `<button class="add-habit-btn" onclick="startAddHabit()">＋ Add new habit</button>`;
+  }
+  addSection += `</div>`;
+
+  // Manage (delete) section at the bottom
+  let manageSection = '';
+  if (habits.length > 0) {
+    manageSection = `<div class="habit-section">
+      <div class="habit-section-title">Manage <span></span></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+        ${habits.map(h => `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)">
+          <span style="font-size:18px">${h.icon}</span>
+          <span style="flex:1;font-size:13px">${h.name}</span>
+          <button onclick="deleteHabit('${h.id}')" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px" title="Delete">🗑</button>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('habitsContent').innerHTML =
+    dateStrip + stats + habitList + addSection + manageSection + '<div style="height:8px"></div>';
+}
+
+function selectHabitDate(dk) {
+  habitView.selectedDate = dk;
+  renderHabits();
+}
+
+function handleHabitToggle(habitId, dk, rowEl) {
+  toggleHabit(habitId, dk);
+  const done = !!habitLogs[dk]?.[habitId];
+  rowEl.classList.toggle('habit-done', done);
+  // Refresh full screen for streak + grid updates
+  renderHabits();
+  if (done) showToast('✅ Habit logged!');
+}
+
+function startAddHabit()  { addingHabit = true;  renderHabits(); setTimeout(()=>document.getElementById('newHabitName')?.focus(),100); }
+function cancelAddHabit() { addingHabit = false; renderHabits(); }
+function selectEmoji(e)   { newHabitEmoji = e; renderHabits(); setTimeout(()=>document.getElementById('newHabitName')?.focus(),50); }
+
+function saveNewHabit() {
+  const name = document.getElementById('newHabitName')?.value?.trim();
+  if (!name) { showToast('Please enter a habit name'); return; }
+  const cat = document.getElementById('newHabitCat')?.value || 'custom';
+  const colors = { fitness:'#c8ff00', health:'#00d68f', mindset:'#9b7eff', custom:'#ffc847' };
+  habits.push({
+    id: 'h' + Date.now(),
+    name, icon: newHabitEmoji,
+    color: colors[cat] || '#3a8cff',
+    category: cat
+  });
+  saveData('ft_habits', habits);
+  addingHabit = false;
+  newHabitEmoji = '⭐';
+  showToast('✨ Habit added!');
+  renderHabits();
+}
+
+function deleteHabit(id) {
+  if (!confirm('Delete this habit? Your log history will be kept.')) return;
+  habits = habits.filter(h => h.id !== id);
+  saveData('ft_habits', habits);
+  showToast('🗑 Habit removed');
+  renderHabits();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  TO-DO LIST
+// ═══════════════════════════════════════════════════════════════════
+let todoDaily    = loadData('ft_todoDaily',    {});   // { "YYYY-MM-DD": [{id,text,done,pri,ts}] }
+let todoBacklog  = loadData('ft_todoBacklog',  []);   // [{id,text,done,pri,ts,created}]
+let todoTab      = 'daily';
+let todoFilter   = 'all';
+let todoPriority = 'medium';
+
+function saveTodoDaily()   { saveData('ft_todoDaily',   todoDaily); }
+function saveTodoBacklog() { saveData('ft_todoBacklog', todoBacklog); }
+
+function getTodayTasks() {
+  const dk = dateKey();
+  if (!todoDaily[dk]) todoDaily[dk] = [];
+  return todoDaily[dk];
+}
+
+function renderTodo() {
+  const dk = dateKey();
+  const dailyTasks = getTodayTasks();
+  const doneDaily  = dailyTasks.filter(t => t.done).length;
+  const pendBacklog = todoBacklog.filter(t => !t.done).length;
+
+  document.getElementById('todoHeaderSub').textContent =
+    `${doneDaily}/${dailyTasks.length} done today · ${pendBacklog} backlog pending`;
+
+  const filterBtns = (active, opts) => `
+    <div class="todo-filters">
+      ${opts.map(([k,l]) => `<button class="filter-btn ${active===k?'active':''}" onclick="setTodoFilter('${k}')">${l}</button>`).join('')}
+    </div>`;
+
+  const addForm = `
+    <div class="todo-add-wrap">
+      <input type="text" id="todoInput" placeholder="Add a task…" maxlength="120"
+        onkeydown="if(event.key==='Enter')addTask()"
+        style="flex:1"/>
+      <button class="todo-add-btn" onclick="addTask()">+</button>
+    </div>
+    <div class="priority-row">
+      <span style="font-size:11px;color:var(--text3);align-self:center">Priority:</span>
+      ${['high','medium','low'].map(p => `
+        <button class="pri-btn ${todoPriority===p?'sel-'+p:''}" onclick="setTodoPriority('${p}')">${p.charAt(0).toUpperCase()+p.slice(1)}</button>`).join('')}
+    </div>`;
+
+  const renderTaskItem = (task, panel) => {
+    const timeStr = task.ts ? new Date(task.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '';
+    return `
+    <div class="task-item pri-${task.pri||'medium'} ${task.done?'task-done':''}"
+      onclick="toggleTask('${task.id}','${panel}')">
+      <div class="task-cb">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <polyline points="1.5,6 5,9.5 10.5,2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="task-body">
+        <div class="task-text">${task.text}</div>
+        <div class="task-meta">
+          ${timeStr ? `<span class="task-time">${timeStr}</span>` : ''}
+          <span class="task-pri-tag ${task.pri||'medium'}">${task.pri||'medium'}</span>
+        </div>
+      </div>
+      <button class="task-del" onclick="event.stopPropagation();deleteTask('${task.id}','${panel}')">×</button>
+    </div>`;
+  };
+
+  // Daily panel
+  const filterDaily = (tasks) => {
+    if (todoFilter === 'pending') return tasks.filter(t => !t.done);
+    if (todoFilter === 'done')    return tasks.filter(t => t.done);
+    if (todoFilter === 'high')    return tasks.filter(t => t.pri === 'high');
+    return tasks;
+  };
+
+  const filteredDaily = filterDaily(dailyTasks);
+  const sortedDaily   = [...filteredDaily].sort((a,b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const pOrder = {high:0,medium:1,low:2};
+    return (pOrder[a.pri]||1) - (pOrder[b.pri]||1);
+  });
+
+  let dailyPanel = `<div class="todo-panel ${todoTab==='daily'?'active':''}" id="todo-daily">
+    <div class="daily-reset-note">📅 Daily tasks reset at midnight each day</div>
+    ${addForm}
+    ${filterBtns(todoFilter,[['all','All'],['pending','Pending'],['done','Done'],['high','🔴 High']])}
+    ${sortedDaily.length === 0 ? `<div class="todo-empty"><div class="big">📋</div>No tasks yet — add one above!</div>` :
+      sortedDaily.map(t => renderTaskItem(t,'daily')).join('')}
+  </div>`;
+
+  // Backlog panel
+  const filterBacklog = (tasks) => {
+    if (todoFilter === 'pending') return tasks.filter(t => !t.done);
+    if (todoFilter === 'done')    return tasks.filter(t => t.done);
+    if (todoFilter === 'high')    return tasks.filter(t => t.pri === 'high');
+    return tasks;
+  };
+  const sortedBacklog = [...filterBacklog(todoBacklog)].sort((a,b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const pOrder = {high:0,medium:1,low:2};
+    return (pOrder[a.pri]||1) - (pOrder[b.pri]||1);
+  });
+
+  let backlogPanel = `<div class="todo-panel ${todoTab==='backlog'?'active':''}" id="todo-backlog">
+    <div class="daily-reset-note">📌 Persistent tasks — stay until you delete them</div>
+    ${addForm.replace(/id="todoInput"/,'id="todoInputBl"').replace(/id="todoInput"/,'id="todoInputBl"')
+      .replace("onclick=\"addTask()\"","onclick=\"addTask('backlog')\"")
+      .replace("if(event.key==='Enter')addTask()","if(event.key==='Enter')addTask('backlog')")}
+    ${filterBtns(todoFilter,[['all','All'],['pending','Pending'],['done','Done'],['high','🔴 High']])}
+    ${sortedBacklog.length === 0 ? `<div class="todo-empty"><div class="big">📌</div>No backlog tasks — add something persistent!</div>` :
+      sortedBacklog.map(t => renderTaskItem(t,'backlog')).join('')}
+    ${sortedBacklog.filter(t=>t.done).length > 0 ? `
+      <button onclick="clearDoneBacklog()" style="width:100%;padding:10px;margin-top:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">
+        🗑 Clear completed tasks
+      </button>` : ''}
+  </div>`;
+
+  const tabs = `
+  <div class="todo-tabs">
+    <button class="todo-tab ${todoTab==='daily'?'active':''}" onclick="setTodoTab('daily')">
+      Daily
+      <span class="todo-badge">${dailyTasks.filter(t=>!t.done).length}</span>
+    </button>
+    <button class="todo-tab ${todoTab==='backlog'?'active':''}" onclick="setTodoTab('backlog')">
+      Backlog
+      <span class="todo-badge">${todoBacklog.filter(t=>!t.done).length}</span>
+    </button>
+  </div>`;
+
+  document.getElementById('todoContent').innerHTML = tabs + dailyPanel + backlogPanel;
+}
+
+function setTodoTab(tab) {
+  todoTab = tab;
+  todoFilter = 'all';
+  renderTodo();
+  setTimeout(() => document.getElementById(tab==='daily'?'todoInput':'todoInputBl')?.focus(), 100);
+}
+
+function setTodoFilter(f) { todoFilter = f; renderTodo(); }
+function setTodoPriority(p) { todoPriority = p; renderTodo(); setTimeout(()=>document.getElementById(todoTab==='daily'?'todoInput':'todoInputBl')?.focus(),50); }
+
+function addTask(panel) {
+  panel = panel || todoTab;
+  const inputId = panel === 'backlog' ? 'todoInputBl' : 'todoInput';
+  const input = document.getElementById(inputId);
+  const text = input?.value?.trim();
+  if (!text) { showToast('Please type a task first'); return; }
+  const task = { id:'t'+Date.now(), text, done:false, pri:todoPriority, ts:Date.now() };
+  if (panel === 'daily') {
+    const dk = dateKey();
+    if (!todoDaily[dk]) todoDaily[dk] = [];
+    todoDaily[dk].unshift(task);
+    saveTodoDaily();
+  } else {
+    task.created = new Date().toLocaleDateString('en-GB');
+    todoBacklog.unshift(task);
+    saveTodoBacklog();
+  }
+  showToast('✅ Task added!');
+  renderTodo();
+  setTimeout(()=>document.getElementById(inputId)?.focus(),100);
+}
+
+function toggleTask(id, panel) {
+  if (panel === 'daily') {
+    const dk = dateKey();
+    const t = (todoDaily[dk]||[]).find(t=>t.id===id);
+    if (t) { t.done = !t.done; saveTodoDaily(); }
+    if (t?.done) showToast('✅ Task done!');
+  } else {
+    const t = todoBacklog.find(t=>t.id===id);
+    if (t) { t.done = !t.done; saveTodoBacklog(); }
+    if (t?.done) showToast('✅ Task done!');
+  }
+  renderTodo();
+}
+
+function deleteTask(id, panel) {
+  if (panel === 'daily') {
+    const dk = dateKey();
+    todoDaily[dk] = (todoDaily[dk]||[]).filter(t=>t.id!==id);
+    saveTodoDaily();
+  } else {
+    todoBacklog = todoBacklog.filter(t=>t.id!==id);
+    saveTodoBacklog();
+  }
+  renderTodo();
+}
+
+function clearDoneBacklog() {
+  todoBacklog = todoBacklog.filter(t=>!t.done);
+  saveTodoBacklog();
+  showToast('🗑 Cleared completed tasks');
+  renderTodo();
 }
 
 // ═══════════════════════════════════════════════════════════════════
