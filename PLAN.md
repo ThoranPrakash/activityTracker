@@ -124,3 +124,7 @@ Habits can be added, removed and reordered. Each shows its streak.
 - Profile: sex, age, height, current weight, typical activity level.
 - Confirm the Wed/Sat/Sun schedule of the current split.
 - Supplements taken (for the habit).
+
+## Status (v2 built)
+- Steps 1–6 done in `v2/` — Today, Workout, Food, Habits, Progress + weekly review, settings, backup, migration, offline/install.
+- Remaining: test on phone, then swap `/v2/` to the site root (step 7).
