@@ -8,7 +8,7 @@ import {
 } from './calc.js';
 import { EX_GROUPS } from '../data/exercises.js';
 import { DEFAULT_PROGRAM } from '../data/program.js';
-import { openSheet, closeSheet, setSheetBody } from './ui.js';
+import { openSheet, closeSheet, setSheetBody, confetti } from './ui.js';
 import {
   $, esc, fmt, uid, todayKey, weekdayIdx, mondayOf, addDays, DAY_SHORT, DAY_NAME, mmss, relDay, toast,
   haptic, beep, num, sum,
@@ -53,6 +53,18 @@ register({
   restAdd: el => { rest.end += +el.dataset.s * 1000; rest.total += +el.dataset.s; tickRest(); },
   restSkip: () => { rest.total = 0; rest.end = 0; tickRest(); },
 });
+
+// ═══════════════ keep the screen on while training ═══════════════
+let wakeLock = null;
+async function holdScreen() {
+  if (!S.active || wakeLock || !('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; });
+  } catch (e) { /* denied or unsupported */ }
+}
+function releaseScreen() { try { wakeLock?.release(); } catch (e) { /* ignore */ } wakeLock = null; }
+document.addEventListener('visibilitychange', holdScreen);
 
 // ═══════════════ session model ═══════════════
 function newEntry(exId, item) {
@@ -127,6 +139,7 @@ let elapsedTimer = null;
 export function renderWorkout(el) {
   clearInterval(elapsedTimer);
   if (S.active) {
+    holdScreen();
     el.innerHTML = sessionHTML();
     elapsedTimer = setInterval(() => {
       const e = $('#sess-elapsed');
@@ -135,6 +148,7 @@ export function renderWorkout(el) {
     }, 1000);
     return;
   }
+  releaseScreen();
   el.innerHTML = overviewHTML();
 }
 
@@ -195,10 +209,21 @@ function sessionHTML() {
   const a = S.active;
   let h = `<div class="sess-top"><div><div class="eyebrow">${esc(a.name)}</div><div class="title num" id="sess-elapsed">${mmss((Date.now() - a.start) / 1000)}</div></div>
     <div class="row"><button class="btn sm dark" data-a="cancelSession">Discard</button><button class="btn sm" data-a="finishSession">Finish</button></div></div>`;
+  const allSets = a.exercises.flatMap(e => e.sets);
+  const doneSets = allSets.filter(x => x.done).length;
+  h += `<div class="row" style="margin:-4px 2px 12px;gap:10px"><div class="bar grow" style="margin:0"><i id="sess-bar" style="width:${allSets.length ? (doneSets / allSets.length) * 100 : 0}%;background:var(--green)"></i></div><span class="muted num" id="sess-count" style="font-size:12px">${doneSets}/${allSets.length} sets</span></div>`;
   if (!a.exercises.length) h += `<div class="card empty">Add exercises from the library to start logging.</div>`;
   a.exercises.forEach((e, i) => { h += exerciseCard(e, i); });
   h += `<button class="btn ghost" data-a="openLibrary" data-mode="session" style="margin-bottom:10px">＋ Add exercise</button>`;
   return h;
+}
+
+function updateSessionBar() {
+  const all = S.active.exercises.flatMap(e => e.sets);
+  const done = all.filter(x => x.done).length;
+  const bar = $('#sess-bar'), cnt = $('#sess-count');
+  if (bar) bar.style.width = `${all.length ? (done / all.length) * 100 : 0}%`;
+  if (cnt) cnt.textContent = `${done}/${all.length} sets`;
 }
 
 function exerciseCard(e, i) {
@@ -272,6 +297,7 @@ register({
     save('active');
     const card = $('#ex-' + i);
     if (card) card.outerHTML = exerciseCard(e, i);
+    updateSessionBar();
   },
   addSet: el => {
     const e = S.active.exercises[+el.dataset.i];
@@ -279,12 +305,14 @@ register({
     e.sets.push({ done: false, ...(last.kg ? { kg: last.kg } : {}) });
     save('active');
     $('#ex-' + el.dataset.i).outerHTML = exerciseCard(e, +el.dataset.i);
+    updateSessionBar();
   },
   removeSet: el => {
     const e = S.active.exercises[+el.dataset.i];
     e.sets.pop();
     save('active');
     $('#ex-' + el.dataset.i).outerHTML = exerciseCard(e, +el.dataset.i);
+    updateSessionBar();
   },
   exMenu: el => {
     const i = +el.dataset.i;
@@ -329,6 +357,7 @@ register({
     save('sessions', 'active');
     render();
     showSummary(session, true);
+    if (session.exercises.some(e => e.sets.some(x => x.pr?.length))) confetti();
   },
 });
 

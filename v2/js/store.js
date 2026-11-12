@@ -9,7 +9,7 @@ export const SCHEMA = 1;
 const DEFAULTS = {
   profile: () => null, // { sex, age, heightCm, weightKg, activity, deficitPct, proteinPerKg, kcalOverride, proteinOverride }
   settings: () => ({ restSec: 90, stepGoal: 8000, waterGoal: 3, sleepGoal: 7 }),
-  checkins: () => ({}), // { date: { weight, sleepH, sleepScore, rhr, steps, energy, soreness, water, waist } }
+  checkins: () => ({}), // { date: { weight, sleepH, sleepScore, rhr, steps, energy, soreness, water, waist, neck, hip } }
   sessions: () => [], // finished workouts
   active: () => null, // workout in progress
   program: () => JSON.parse(JSON.stringify(DEFAULT_PROGRAM)),
@@ -37,6 +37,9 @@ export function defaultHabits() {
 export const S = {};
 const KEY = name => 'ft2_' + name;
 
+// Bumped on every save/load so calc.js can drop its memoised results.
+export let rev = 0;
+
 function read(key, fallback) {
   try {
     const v = localStorage.getItem(key);
@@ -48,9 +51,11 @@ function read(key, fallback) {
 
 export function loadAll() {
   for (const name of Object.keys(DEFAULTS)) S[name] = read(KEY(name), DEFAULTS[name]());
+  rev++;
 }
 
 export function save(...names) {
+  rev++;
   for (const name of names) {
     try {
       localStorage.setItem(KEY(name), JSON.stringify(S[name]));
@@ -79,6 +84,7 @@ export function resetAll() {
     localStorage.removeItem(KEY(name));
     S[name] = DEFAULTS[name]();
   }
+  rev++;
   S.meta.migrated = true; // don't re-import old data after an explicit reset
   save('meta');
 }

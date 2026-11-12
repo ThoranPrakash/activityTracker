@@ -37,7 +37,7 @@ export function renderFood(el) {
     const mt = mealTotals(items);
     h += `<div class="card"><div class="ch"><span>${m.icon} ${m.name}</span><small>${items.length ? `${fmt(mt.kcal)} kcal · ${fmt(mt.p)} g P` : '—'}</small></div>`;
     items.forEach((it, k) => {
-      h += `<div class="li tap" data-a="editItem" data-m="${m.id}" data-k="${k}"><div class="grow"><div class="t">${esc(it.name)} ${TAG[it.tag] || ''}</div><div class="s">${fmt(it.g)} g</div></div>
+      h += `<div class="li tap" data-a="editItem" data-m="${m.id}" data-k="${k}"><div class="grow"><div class="t">${esc(it.name)} ${TAG[it.tag] || ''}</div><div class="s">${it.g ? fmt(it.g) + ' g' : 'quick add'}</div></div>
         <div class="k">${fmt(it.kcal)}<span>${fmt(it.p)} g P</span></div></div>`;
     });
     h += `<div class="row" style="gap:14px;flex-wrap:wrap;${items.length ? 'border-top:1px solid var(--line);padding-top:10px' : ''}">
@@ -70,7 +70,7 @@ function recentFoods() {
 let pick = { meal: 'breakfast', q: '', cat: null };
 function openAddFood(meal) {
   pick = { meal, q: '', cat: null };
-  openSheet(`Add to ${mealName(meal)}`, addFoodHTML(), { right: `<button class="link" data-a="newFood">＋ Custom</button>`, onclose: render });
+  openSheet(`Add to ${mealName(meal)}`, addFoodHTML(), { right: `<button class="link blue" data-a="quickAdd" style="margin-right:10px">⚡ Quick</button><button class="link" data-a="newFood">＋ Custom</button>`, onclose: render });
 }
 function addFoodHTML() {
   return `<input class="search" id="food-q" placeholder="Search foods…" value="${esc(pick.q)}" data-in="foodSearch" autocomplete="off">
@@ -131,6 +131,21 @@ const qtyMacros = e => `<div class="st"><div class="l">kcal</div><div class="v c
   <div class="st"><div class="l">Carbs</div><div class="v c-orange">${fmt(e.c)}g</div></div>
   <div class="st"><div class="l">Fat</div><div class="v c-yellow">${fmt(e.f)}g</div></div>`;
 
+/** Type calories/protein straight in — for restaurant meals or anything not in the list. */
+function openQuick(it, k) {
+  const v = x => (it && it[x] ? Math.round(it[x]) : '');
+  openSheet(`Quick add · ${mealName(pick.meal)}`, `<div class="muted" style="margin-bottom:12px">For restaurant meals or anything not in the list — just type the numbers.</div>
+    <div class="field"><label>What was it?</label><input id="qa-name" placeholder="e.g. Office lunch thali" value="${esc(it?.name === 'Quick add' ? '' : it?.name || '')}"></div>
+    <div class="grid2"><div class="field"><label>Calories (kcal)</label><input id="qa-kcal" type="number" inputmode="numeric" value="${v('kcal')}"></div>
+    <div class="field"><label>Protein (g)</label><input id="qa-p" type="number" inputmode="numeric" value="${v('p')}"></div>
+    <div class="field"><label>Carbs (g)</label><input id="qa-c" type="number" inputmode="numeric" value="${v('c')}"></div>
+    <div class="field"><label>Fat (g)</label><input id="qa-f" type="number" inputmode="numeric" value="${v('f')}"></div></div>
+    <div class="field"><label>Type</label><select id="qa-tag">${[['w', 'Regular meal'], ['p', 'Protein-rich'], ['j', 'Junk / fried / sweet']].map(([x, l]) => `<option value="${x}" ${it?.tag === x ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+    <div class="muted" style="font-size:12px;margin-bottom:12px">Rough guide: a typical restaurant plate is 600–900 kcal; a biryani about 550–700.</div>
+    <button class="btn" data-a="quickSave" data-k="${k ?? ''}">${k == null ? 'Add' : 'Update'}</button>
+    ${k != null ? `<button class="btn danger" style="margin-top:8px" data-a="quickDelete" data-k="${k}">Remove</button>` : ''}`, { onclose: render });
+}
+
 function mealList(date, meal) {
   const d = (S.food[date] ||= {});
   return (d[meal] ||= []);
@@ -148,6 +163,7 @@ register({
   pickFood: el => { const f = foodById(el.dataset.id); if (f) openQty(f, f.g, pick.meal); },
   editItem: el => {
     const it = mealList(view.foodDate, el.dataset.m)[+el.dataset.k];
+    if (!it.g) { pick.meal = el.dataset.m; return openQuick(it, +el.dataset.k); }
     const f = foodById(it.fid) || { id: it.fid, name: it.name, cat: 'Logged', g: it.g, label: `${it.g} g`, kcal: (it.kcal / it.g) * 100, p: (it.p / it.g) * 100, c: (it.c / it.g) * 100, f: (it.f / it.g) * 100, tag: it.tag };
     openQty(f, it.g, el.dataset.m, +el.dataset.k);
   },
@@ -206,6 +222,21 @@ register({
     S.savedMeals = S.savedMeals.filter(x => x.id !== el.dataset.id);
     save('savedMeals'); closeSheet();
   },
+  quickAdd: () => openQuick(null, null),
+  quickSave: el => {
+    const kcal = num($('#qa-kcal').value);
+    if (kcal == null) return toast('Enter calories');
+    const e = {
+      fid: 'quick', name: $('#qa-name').value.trim() || 'Quick add', g: 0, tag: $('#qa-tag').value,
+      kcal, p: num($('#qa-p').value) || 0, c: num($('#qa-c').value) || 0, f: num($('#qa-f').value) || 0,
+    };
+    const list = mealList(view.foodDate, pick.meal);
+    if (el.dataset.k === '') list.push(e); else list[+el.dataset.k] = e;
+    save('food');
+    toast(`Added ${e.name} · ${fmt(e.kcal)} kcal`);
+    closeSheet();
+  },
+  quickDelete: el => { mealList(view.foodDate, pick.meal).splice(+el.dataset.k, 1); save('food'); closeSheet(); },
   newFood: () => {
     setSheetBody(`<div class="muted" style="margin-bottom:12px">Enter values for one serving — check the pack label or a quick search.</div>
       <div class="field"><label>Name</label><input id="nf-name" placeholder="e.g. Mom’s chicken fry"></div>

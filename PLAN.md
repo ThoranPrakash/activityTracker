@@ -128,3 +128,11 @@ Habits can be added, removed and reordered. Each shows its streak.
 ## Status (v2 built)
 - Steps 1–6 done in `v2/` — Today, Workout, Food, Habits, Progress + weekly review, settings, backup, migration, offline/install.
 - Remaining: test on phone, then swap `/v2/` to the site root (step 7).
+
+## Round 2 enhancements
+- Today: 7-day week strip with mini rings (tap a day to view or fix it), daily coach nudges, greeting, perfect-day confetti.
+- Check-in: neck/hip tape measurements → body-fat %, fat mass and lean mass estimate (US Navy method) in Progress → Body.
+- Progress: Awards tab (22 badges + live streaks); weekly review adds sets per muscle group and perfect days.
+- Food: ⚡ Quick add (type calories/protein directly).
+- Workout: screen stays awake during a session, set-progress bar, confetti on PRs.
+- Under the hood: cached calculations, 16px inputs (no iOS zoom), auto-reload when a new version is deployed.
