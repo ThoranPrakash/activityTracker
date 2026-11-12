@@ -68,6 +68,7 @@ function settingsHTML() {
     <div class="muted" style="margin-bottom:10px">Everything is stored only on this phone. Export a backup every week or two, and keep it in Google Drive / email.</div>
     <div class="btn-row" style="margin-bottom:8px"><button class="btn" data-a="exportData">⤓ Export backup</button><button class="btn dark" data-a="importData">⤒ Import</button></div>
     ${hasOldData() ? `<button class="btn dark" data-a="migrate" style="margin-bottom:8px">Import data from old FitTracker</button>` : ''}
+    ${hasOldData() ? `<a class="btn dark" href="old/" style="margin-bottom:8px;text-decoration:none">Open the old app</a>` : ''}
     <button class="btn danger" data-a="resetData">Erase all v2 data</button>
     <input type="file" id="import-file" accept="application/json,.json" style="display:none">
   </div>

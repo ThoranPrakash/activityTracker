@@ -136,3 +136,7 @@ Habits can be added, removed and reordered. Each shows its streak.
 - Food: ⚡ Quick add (type calories/protein directly).
 - Workout: screen stays awake during a session, set-progress bar, confetti on PRs.
 - Under the hood: cached calculations, 16px inputs (no iOS zoom), auto-reload when a new version is deployed.
+
+## Step 7 done: v2 is the main page
+- The app now lives at the site root. `v2/` only forwards to it (and retires the old `v2/` service worker).
+- The previous single-file app is kept at `old/` as a fallback.
