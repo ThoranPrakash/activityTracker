@@ -28,15 +28,15 @@ export const sheetOpen = () => $('#sheet').classList.contains('show');
 // ── activity rings ─────────────────────────────────────────
 export function ringsSVG(rings, size = 150) {
   // rings: [{ pct, color, track }] outer → inner
-  const stroke = size * 0.1;
+  const stroke = size * (size < 60 ? 0.12 : 0.1);
   const c = size / 2;
   let out = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">`;
   rings.forEach((r, i) => {
-    const rad = c - stroke / 2 - i * (stroke + 3);
+    const rad = c - stroke / 2 - i * (stroke + (size < 60 ? 1 : 3));
     const circ = 2 * Math.PI * rad;
     const pct = Math.max(0, Math.min(1, r.pct || 0));
     out += `<circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${r.track}" stroke-width="${stroke}"/>`;
-    if (pct > 0) out += `<circle cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${r.color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(circ * pct).toFixed(1)} ${circ.toFixed(1)}"/>`;
+    if (pct > 0) out += `<circle class="rp" cx="${c}" cy="${c}" r="${rad}" fill="none" stroke="${r.color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(circ * pct).toFixed(1)} ${circ.toFixed(1)}" style="--circ:${circ.toFixed(1)}"/>`;
   });
   return out + '</svg>';
 }
@@ -65,7 +65,7 @@ export function lineChart(series, { height = 150, xLabels = [], unit = '', dp = 
   }
   xLabels.forEach(l => {
     const x = X(l.x);
-    const anchor = x < pl + 20 ? 'start' : x > W - pr - 20 ? 'end' : 'middle';
+    const anchor = x < pl + 30 ? 'start' : x > W - pr - 30 ? 'end' : 'middle';
     svg += `<text x="${x}" y="${H - 4}" text-anchor="${anchor}">${esc(l.label)}</text>`;
   });
   for (const s of series) {
@@ -100,4 +100,19 @@ export function barChart(bars, { height = 120, target = null } = {}) {
     svg += `<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="#98989F" stroke-dasharray="4 4"/>`;
   }
   return svg + '</svg>';
+}
+
+// ── confetti ───────────────────────────────────────────────
+export function confetti() {
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  const box = document.createElement('div');
+  box.className = 'confetti';
+  const colors = ['#FA114F', '#A6FF00', '#00E5F0', '#FFD60A', '#BF5AF2', '#FF9F0A'];
+  for (let i = 0; i < 70; i++) {
+    const p = document.createElement('i');
+    p.style.cssText = `left:${Math.random() * 100}%;background:${colors[i % colors.length]};animation-delay:${Math.random() * 0.5}s;animation-duration:${1.6 + Math.random() * 1.2}s;--x:${(Math.random() - 0.5) * 160}px;--r:${Math.random() * 720 - 360}deg;width:${6 + Math.random() * 6}px;height:${8 + Math.random() * 8}px`;
+    box.appendChild(p);
+  }
+  document.body.appendChild(box);
+  setTimeout(() => box.remove(), 3400);
 }

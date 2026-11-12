@@ -5,6 +5,7 @@ import { mondayOf, todayKey } from './util.js';
 
 export const view = {
   tab: 'today',
+  day: todayKey(), // date shown on the Today tab
   foodDate: todayKey(),
   progSeg: 'body',
   strengthEx: null,

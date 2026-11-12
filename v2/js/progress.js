@@ -4,7 +4,8 @@ import { S } from './store.js';
 import { view, register, render } from './core.js';
 import {
   weightSeries, weightTrend, waistSeries, trendAt, exById, allExercises, e1rm, bests, sessionVolume, dayTotals,
-  dayItems, habitStatus, targets, adaptiveTDEE, checkin, profileComplete,
+  dayItems, habitStatus, targets, adaptiveTDEE, checkin, profileComplete, bodyFat, bodyFatSeries, awards, setsByGroup,
+  perfectDay,
 } from './calc.js';
 import { MEALS } from '../data/foods.js';
 import { setText } from './workout.js';
@@ -13,12 +14,12 @@ import {
   esc, fmt, todayKey, addDays, daysBetween, parseKey, mondayOf, fmtDate, relDay, avg, sum, DAY_SHORT,
 } from './util.js';
 
-const SEGS = [['body', 'Body'], ['strength', 'Strength'], ['habits', 'Habits'], ['review', 'Review']];
+const SEGS = [['body', 'Body'], ['strength', 'Strength'], ['habits', 'Habits'], ['review', 'Review'], ['awards', 'Awards']];
 
 export function renderProgress(el) {
   let h = `<div class="top"><div><div class="eyebrow">${esc(fmtDate(todayKey()))}</div><div class="title">Progress</div></div></div>
     <div class="seg">${SEGS.map(([k, l]) => `<button class="${view.progSeg === k ? 'on' : ''}" data-a="progSeg" data-s="${k}">${l}</button>`).join('')}</div>`;
-  h += { body: bodyHTML, strength: strengthHTML, habits: habitsHTML, review: reviewHTML }[view.progSeg]();
+  h += { body: bodyHTML, strength: strengthHTML, habits: habitsHTML, review: reviewHTML, awards: awardsHTML }[view.progSeg]();
   el.innerHTML = h;
 }
 register({
@@ -73,6 +74,8 @@ function bodyHTML() {
     ${ws.length ? lineChart([{ points: ws.map(p => ({ x: xOf(p.date), y: p.v })), color: '#00E5F0', dots: true }], { xLabels: ws.length > 1 ? dateLabels(ws[0].date, ws[ws.length - 1].date) : [], unit: ' cm' }) : '<div class="empty">Add waist in the check-in (weekly is enough).</div>'}
     ${ws.length > 1 ? `<div class="muted" style="margin-top:6px">Change since first: <b class="${ws[ws.length - 1].v <= ws[0].v ? 'c-green' : 'c-orange'}">${sign(ws[ws.length - 1].v - ws[0].v)} cm</b></div>` : ''}</div>`;
 
+  h += bodyCompHTML();
+
   h += `<div class="tip"><b>Reading a recomp:</b> waist going down while weight stays about the same (or drops slowly) means you’re losing fat and keeping or gaining muscle. Aim for 0.25–0.5 kg/week loss at most.</div>`;
 
   const t = targets();
@@ -80,6 +83,31 @@ function bodyHTML() {
   h += `<div class="card"><div class="ch">Energy balance</div>
     ${profileComplete() ? `<div class="mini"><div><b>${fmt(t.bmr)}</b>BMR</div><div><b>${fmt(t.tdee)}</b>Est. burn</div><div><b>${fmt(t.kcal)}</b>Target</div><div><b>${t.protein} g</b>Protein</div></div>` : '<div class="muted">Set up your profile to see targets.</div>'}
     ${ad ? `<div class="hr"></div><div class="muted">Based on the last ${ad.days} days you ate ~<b style="color:var(--t1)">${fmt(ad.intake)}</b> kcal and your trend moved <b style="color:var(--t1)">${ad.kgPerWeek.toFixed(2)} kg/week</b>, so your real burn is about <b class="c-green">${fmt(ad.tdee)} kcal</b>.</div>` : '<div class="hr"></div><div class="muted">After 3 weeks of logging weight + food, this card estimates your real maintenance calories.</div>'}</div>`;
+  return h;
+}
+
+function bodyCompHTML() {
+  const bf = bodyFat();
+  if (!bf) {
+    return `<div class="card"><div class="ch">Body composition <small>estimate</small></div>
+      <div class="muted">Log <b style="color:var(--t1)">waist</b> and <b style="color:var(--t1)">neck</b> in a check-in${S.profile?.sex === 'female' ? ' (plus hips)' : ''} and the app estimates your body-fat %, fat mass and lean mass — the numbers that actually show a recomp.</div></div>`;
+  }
+  const series = bodyFatSeries();
+  const first = series[0].bf;
+  const sg = v => (Math.abs(v) < 0.05 ? '±0.0' : (v > 0 ? '+' : '') + v.toFixed(1));
+  const multi = series.length > 1;
+  let h = `<div class="card"><div class="ch">Body composition <small>tape-measure estimate</small></div>
+    <div class="grid3" style="margin-bottom:${multi ? 10 : 0}px">
+      <div class="st"><div class="l">Body fat</div><div class="v c-orange">${bf.pct.toFixed(1)}%</div>${multi ? `<div class="l ${bf.pct <= first.pct ? 'c-green' : 'c-orange'}">${sg(bf.pct - first.pct)} pts</div>` : ''}</div>
+      <div class="st"><div class="l">Fat mass</div><div class="v">${bf.fat.toFixed(1)}<span class="muted"> kg</span></div>${multi ? `<div class="l ${bf.fat <= first.fat ? 'c-green' : 'c-orange'}">${sg(bf.fat - first.fat)} kg</div>` : ''}</div>
+      <div class="st"><div class="l">Lean mass</div><div class="v c-cyan">${bf.lean.toFixed(1)}<span class="muted"> kg</span></div>${multi ? `<div class="l ${bf.lean >= first.lean ? 'c-green' : 'c-orange'}">${sg(bf.lean - first.lean)} kg</div>` : ''}</div>
+    </div>`;
+  if (multi) {
+    h += lineChart([
+      { points: series.map(p => ({ x: xOf(p.date), y: p.bf.pct })), color: '#FF9F0A', dots: true },
+    ], { xLabels: dateLabels(series[0].date, series[series.length - 1].date), unit: '%', height: 120 });
+  }
+  h += `<div class="muted" style="font-size:12px;margin-top:8px">US Navy tape method — accurate to about ±3–4 points, but very good at showing the direction of change. Measure the same way each week.</div></div>`;
   return h;
 }
 
@@ -251,6 +279,15 @@ function reviewHTML() {
 
   h += `<div class="sec-title" style="margin-top:6px">Next week</div>${suggestions(w).map(s => `<div class="tip ${s.cls}">${s.t}</div>`).join('')}`;
 
+  const groups = setsByGroup(mon, addDays(mon, 6)).filter(([g]) => !['Cardio', 'Mobility'].includes(g));
+  if (groups.length) {
+    const max = Math.max(...groups.map(g => g[1]));
+    h += `<div class="card"><div class="ch">Sets by muscle group <small>10–20 a week builds muscle</small></div>
+      ${groups.map(([g, n]) => `<div class="hbar"><span>${esc(g)}</span><div class="bar"><i style="width:${(n / max) * 100}%;background:${n >= 10 ? 'var(--green)' : 'var(--cyan)'}"></i></div><span>${n}</span></div>`).join('')}</div>`;
+  }
+  const perfect = w.days.filter(perfectDay).length;
+  if (perfect) h += `<div class="tip good"><b>✨ ${perfect} perfect day${perfect > 1 ? 's' : ''}</b> this week — protein, calories, workout and steps all on target.</div>`;
+
   h += `<div class="card"><div class="ch">Most eaten <small>${w.junk ? `🍟 junk: ${w.junk}×` : '✓ no junk'}</small></div>
     ${w.topFoods.length ? w.topFoods.map(([n, c]) => `<div class="li"><div class="grow t">${esc(n)}</div><div class="muted">${c}×</div></div>`).join('') : '<div class="empty">No food logged this week.</div>'}</div>`;
 
@@ -259,5 +296,26 @@ function reviewHTML() {
   }
 
   h += `<div class="card"><div class="ch">Workouts</div>${w.sessions.length ? w.sessions.map(s => `<div class="li tap" data-a="sessionDetail" data-id="${s.id}"><div class="grow"><div class="t">${esc(s.name)}</div><div class="s">${relDay(s.date)}</div></div><div class="k">${fmt(sessionVolume(s))}<span style="color:var(--t2)">kg</span></div></div>`).join('') : '<div class="empty">No workouts this week.</div>'}</div>`;
+  return h;
+}
+
+// ═══════════════ awards ═══════════════
+function awardsHTML() {
+  const a = awards();
+  const st = a.streaks;
+  const got = a.list.filter(x => x.done).length;
+  let h = `<div class="streaks">
+    <div class="st"><div class="v c-green">${st.weeks}</div><div class="l">full weeks in a row</div></div>
+    <div class="st"><div class="v c-blue">${st.protein.current}</div><div class="l">days protein hit</div></div>
+    <div class="st"><div class="v c-pink">${st.logging.current}</div><div class="l">days food logged</div></div>
+    <div class="st"><div class="v c-cyan">${st.checkins.current}</div><div class="l">days weighed in</div></div></div>
+    <div class="sec-title" style="margin-top:6px">Awards <span class="muted">${got} of ${a.list.length}</span></div>
+    <div class="awards">`;
+  const sorted = [...a.list].sort((x, y) => (y.done - x.done) || (y.have / y.need - x.have / x.need));
+  for (const x of sorted) {
+    const prog = x.need > 1 && !x.done ? `<div class="bar"><i style="width:${(x.have / x.need) * 100}%;background:var(--green)"></i></div>` : '';
+    h += `<div class="aw ${x.done ? 'done' : ''}"><div class="ai">${x.icon}</div><div class="an">${esc(x.name)}</div><div class="ad">${esc(x.desc)}</div>${prog}</div>`;
+  }
+  h += `</div><div class="muted" style="text-align:center;margin-bottom:12px;font-size:12.5px">Best streaks — protein ${st.protein.best} days · logging ${st.logging.best} days · no junk ${st.nojunk.best} days</div>`;
   return h;
 }

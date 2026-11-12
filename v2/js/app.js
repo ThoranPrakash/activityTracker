@@ -12,12 +12,19 @@ import { $, $$, todayKey, toast } from './util.js';
 
 const RENDER = { today: renderToday, workout: renderWorkout, food: renderFood, progress: renderProgress };
 let lastTab = null;
+let animTimer;
 
 function render() {
   for (const t of Object.keys(RENDER)) $('#screen-' + t).classList.toggle('active', t === view.tab);
   $$('.tab').forEach(b => b.classList.toggle('on', b.dataset.t === view.tab));
   RENDER[view.tab]($('#screen-' + view.tab));
-  if (lastTab !== view.tab) { window.scrollTo(0, 0); lastTab = view.tab; }
+  if (lastTab !== view.tab) {
+    window.scrollTo(0, 0);
+    lastTab = view.tab;
+    document.body.classList.add('anim');
+    clearTimeout(animTimer);
+    animTimer = setTimeout(() => document.body.classList.remove('anim'), 1000);
+  }
 }
 setRender(render);
 
@@ -53,6 +60,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && todayKey() !== renderedDay) {
     renderedDay = todayKey();
     view.foodDate = renderedDay;
+    view.day = renderedDay;
     render();
   }
 });
@@ -71,5 +79,14 @@ render();
 
 // ── offline support ──
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  const hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('./sw.js').catch(() => {});
+  // A new version took over: reload once it is safe (no workout or sheet open).
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return;
+    const reload = () => { if (!S.active && !$('#sheet').classList.contains('show')) location.reload(); };
+    toast('⬆️ App updated');
+    setTimeout(reload, 1200);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reload(); });
+  });
 }
